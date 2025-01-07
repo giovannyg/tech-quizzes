@@ -394,3 +394,308 @@ So, **`try-catch`** is for dealing with **exceptions**, while **`set_error_handl
 
 - **`include` vs `require`**: `include` issues a **warning** on failure but continues, while `require` halts the script on failure.
 - **`_once` variants**: Both `include_once` and `require_once` prevent the file from being included multiple times, ensuring no duplication or errors like redeclaring classes or functions.
+
+**11. What are PHP's magic methods? Can you name and explain at least three of them, along with examples?**
+
+### **1. `__call()`**
+
+- **Purpose**: This method is triggered when **an inaccessible or undefined method** is called on an object.
+- **When to use**: Use it to handle dynamic method calls or to create a flexible API for your class.
+
+Example:
+
+```php
+class DynamicMethods {
+    public function __call($name, $arguments) {
+        echo "The method '$name' was called with arguments: " . implode(', ', $arguments) . "\n";
+    }
+}
+
+$obj = new DynamicMethods();
+$obj->someMethod('arg1', 'arg2'); // Output: The method 'someMethod' was called with arguments: arg1, arg2
+```
+
+---
+
+### **2. `__get()`**
+
+- **Purpose**: This method is triggered when **accessing an undefined or inaccessible property** of an object.
+- **When to use**: Use it for handling dynamic properties or lazy loading of data.
+
+Example:
+
+```php
+class DynamicProperties {
+    private $data = ['name' => 'John', 'age' => 30];
+
+    public function __get($property) {
+        return $this->data[$property] ?? "Property '$property' does not exist";
+    }
+}
+
+$obj = new DynamicProperties();
+echo $obj->name; // Output: John
+echo $obj->height; // Output: Property 'height' does not exist
+```
+
+---
+
+### **3. `__construct()`**
+
+- **Purpose**: This is the **constructor method**, called automatically when a new object of the class is created.
+- **When to use**: Use it to initialize object properties or perform setup tasks when an object is instantiated.
+
+Example:
+
+```php
+class User {
+    private $name;
+
+    public function __construct($name) {
+        $this->name = $name;
+        echo "User '$name' has been created.\n";
+    }
+
+    public function getName() {
+        return $this->name;
+    }
+}
+
+$user = new User('Alice'); // Output: User 'Alice' has been created.
+echo $user->getName(); // Output: Alice
+```
+
+---
+
+### **Other Common Magic Methods (For Reference):**
+
+1. `__set()` – Triggered when setting an undefined or inaccessible property.
+2. `__isset()` – Triggered when calling `isset()` or `empty()` on inaccessible properties.
+3. `__unset()` – Triggered when `unset()` is used on inaccessible properties.
+4. `__toString()` – Defines what happens when an object is treated as a string.
+5. `__invoke()` – Triggered when an object is called as a function.
+6. `__clone()` – Defines behavior when an object is cloned.
+
+Magic methods are incredibly powerful but should be used carefully to avoid making the code confusing.
+
+**12. What are PHP Namespaces, and why are they used? Can you give an example of how to declare and use namespaces in PHP?**
+
+You're absolutely right! PHP namespaces are indeed a great way to organize and avoid name collisions in your code.
+
+Let me expand on your explanation with a bit more detail and examples.
+
+---
+
+### **What are PHP Namespaces?**
+
+- **Definition**: A namespace in PHP is a way to encapsulate classes, interfaces, functions, or constants into a separate context. Think of it as a **directory-like structure** for your code.
+- **Purpose**:
+  1. **Avoid class name collisions**: If two libraries define a class with the same name, namespaces ensure they can coexist.
+  2. **Improve code organization**: They allow you to structure your code logically and hierarchically.
+
+---
+
+### **Declaring and Using Namespaces**
+
+#### **Declaration:**
+
+You declare a namespace at the top of a PHP file, before any code, using the `namespace` keyword.
+
+Example:
+
+```php
+namespace App\Services;
+
+class ServiceClassName {
+    public function greet() {
+        return "Hello from ServiceClassName!";
+    }
+}
+```
+
+#### **Using a Namespace:**
+
+To use a class from a namespace, you can:
+
+1. Use the **fully qualified name** (including the namespace).
+2. Use the `use` keyword to import the namespace or specific class.
+
+Example:
+
+```php
+require 'ServiceClassName.php'; // Assuming this file contains the class with namespace App\Services
+
+// Option 1: Fully qualified name
+$service = new \App\Services\ServiceClassName();
+echo $service->greet(); // Output: Hello from ServiceClassName!
+
+// Option 2: Using the `use` keyword
+use App\Services\ServiceClassName;
+
+$service = new ServiceClassName();
+echo $service->greet(); // Output: Hello from ServiceClassName!
+```
+
+---
+
+### **Key Points to Remember:**
+
+1. **Global Namespace**: If no namespace is declared, your code resides in the global namespace.
+2. **Sub-namespaces**: Namespaces can be hierarchical, e.g., `App\Models` and `App\Controllers`.
+3. **Alias with `as`**: You can alias a namespace or class for convenience.
+
+   ```php
+   use App\Services\ServiceClassName as Service;
+   $service = new Service();
+   ```
+
+4. **Autoloading**: Namespaces pair well with **autoloaders** (e.g., PSR-4), which map namespaces to directory structures.
+
+---
+
+### **When to Use Namespaces**
+
+- In large applications or libraries to keep code organized.
+- When integrating third-party libraries to avoid naming conflicts.
+- In modern frameworks like Laravel or Symfony, where namespaces are heavily used.
+
+**13. What are PHP sessions? How do you start a session, and how are sessions different from cookies?**
+
+Spot on! You nailed the key concepts. Let me expand on your explanation with more details and examples for clarity:
+
+---
+
+### **What are PHP Sessions?**
+
+- **Definition**: PHP sessions allow you to store **user-specific data** on the server side. This data can persist across multiple requests within a session (e.g., a user's login state or preferences).
+- **How it works**: When a session is started, PHP generates a unique **session ID** and stores it as a cookie in the user’s browser (or passes it via URL if cookies are disabled). The session ID maps to the session data stored on the server.
+
+---
+
+### **How to Start a Session**
+
+- You can start a session using the `session_start()` function. It must be called **before any output** (e.g., HTML or echo statements).
+
+Example:
+
+```php
+<?php
+// Start the session
+session_start();
+
+// Store session data
+$_SESSION['username'] = 'JohnDoe';
+$_SESSION['role'] = 'admin';
+
+// Retrieve session data
+echo $_SESSION['username']; // Output: JohnDoe
+```
+
+---
+
+### **Differences Between Sessions and Cookies**
+
+| Feature           | **Sessions**                                       | **Cookies**                                    |
+|--------------------|---------------------------------------------------|-----------------------------------------------|
+| **Storage**       | Data is stored on the **server**.                  | Data is stored on the **client's browser**.   |
+| **Security**      | More secure since data isn’t exposed to the user.  | Less secure as data is stored on the client.  |
+| **Capacity**      | No strict size limit (depends on server settings). | Limited to ~4KB per cookie.                   |
+| **Lifespan**      | Exists until the browser is closed or timeout.     | Can persist for a long time (via `expiry`).   |
+| **Performance**   | Requires server resources to manage sessions.      | Uses less server resources.                   |
+
+---
+
+### **When to Use Sessions vs Cookies**
+
+- Use **sessions** when you need to store **sensitive or large data** (like user IDs, cart items, or login states) securely.
+- Use **cookies** when you want to store **small, non-sensitive data** (like preferences or last visited pages) on the client side.
+
+---
+
+### **Bonus: Destroying a Session**
+
+To end a session and clear the stored data:
+
+```php
+session_start();
+session_destroy(); // Ends the session
+```
+
+---
+
+**14. What are prepared statements in PHP, and why should you use them? Can you show an example of using prepared statements with PDO?**
+
+Prepared statements are indeed used to prevent SQL injection, but let me refine your example and explanation for clarity and accuracy.
+
+---
+
+### **What are Prepared Statements?**
+
+- **Definition**: Prepared statements are a way to execute SQL queries securely. They separate the SQL logic from the data, ensuring that user input is treated as **data** and not executable SQL code.
+- **Why use them?**
+  1. **Prevent SQL Injection**: Input data is automatically escaped.
+  2. **Efficiency**: The SQL statement is parsed and compiled once, and can be executed multiple times with different values.
+  3. **Readability**: They make code cleaner and easier to manage.
+
+---
+
+### **Using Prepared Statements with PDO**
+
+Here’s a corrected example of how to use prepared statements with **PDO**:
+
+```php
+<?php
+try {
+    // Step 1: Create a PDO instance (database connection)
+    $pdo = new PDO('mysql:host=localhost;dbname=testdb', 'username', 'password');
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+    // Step 2: Prepare the SQL statement with placeholders
+    $stmt = $pdo->prepare('SELECT * FROM users WHERE id = :id');
+
+    // Step 3: Bind parameters (securely associate values with placeholders)
+    $stmt->bindParam(':id', $userId, PDO::PARAM_INT);
+
+    // Step 4: Set the parameter value and execute the statement
+    $userId = 1; // Example user ID
+    $stmt->execute();
+
+    // Step 5: Fetch the results
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    print_r($user);
+} catch (PDOException $e) {
+    echo 'Error: ' . $e->getMessage();
+}
+```
+
+---
+
+### **Key Steps in PDO Prepared Statements**
+
+1. **Prepare** the SQL query with placeholders (`:placeholder` or `?`).
+2. **Bind values** securely using `bindParam()` or pass them directly in `execute()`.
+3. **Execute** the prepared statement.
+4. **Fetch** the results if needed (e.g., `fetch()`, `fetchAll()`).
+
+---
+
+### **Alternative: Using `?` Placeholders**
+
+You can also use positional placeholders instead of named ones:
+
+```php
+$stmt = $pdo->prepare('SELECT * FROM users WHERE id = ?');
+$stmt->execute([1]); // Pass values as an array
+$user = $stmt->fetch(PDO::FETCH_ASSOC);
+print_r($user);
+```
+
+---
+
+### **Difference Between PDO and MySQLi for Prepared Statements**
+
+- **PDO**: Supports multiple database systems (MySQL, PostgreSQL, SQLite, etc.).
+- **MySQLi**: Works only with MySQL but offers similar functionality for prepared statements.
+
+---
