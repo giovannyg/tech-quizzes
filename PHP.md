@@ -699,3 +699,478 @@ print_r($user);
 - **MySQLi**: Works only with MySQL but offers similar functionality for prepared statements.
 
 ---
+
+**15. What is the difference between `isset()`, `empty()`, and `is_null()` in PHP? Can you provide examples of how each is used?**
+
+You're close! Your explanations capture the essence, but there’s a bit more nuance to these functions. Let me clarify their differences and provide examples for each.
+
+---
+
+### **1. `isset()`**
+
+- **Purpose**: Checks if a variable is **set** (i.e., declared) and is **not `null`**.
+- **Returns**: `true` if the variable exists and is not `null`, otherwise `false`.
+
+Example:
+
+```php
+$var1 = 'Hello';
+$var2 = null;
+
+echo isset($var1); // Output: true (variable is set and not null)
+echo isset($var2); // Output: false (variable is null)
+echo isset($var3); // Output: false (variable is not defined)
+```
+
+> **Key Note**: `isset()` does not generate an error for undefined variables, but it returns `false`.
+
+---
+
+### **2. `empty()`**
+
+- **Purpose**: Checks whether a variable is **empty**. A variable is considered empty if it:
+  - Doesn't exist.
+  - Has a value of `false`, `0`, `0.0`, `"0"`, `null`, `""` (empty string), or an empty array (`[]`).
+- **Returns**: `true` if the variable is empty, otherwise `false`.
+
+Example:
+
+```php
+$var1 = '';
+$var2 = 0;
+$var3 = null;
+$var4 = 'Hello';
+
+echo empty($var1); // Output: true (empty string)
+echo empty($var2); // Output: true (value is 0)
+echo empty($var3); // Output: true (value is null)
+echo empty($var4); // Output: false (non-empty string)
+```
+
+> **Key Note**: Unlike `isset()`, `empty()` does not distinguish between `0` and `null` as both are considered "empty."
+
+---
+
+### **3. `is_null()`**
+
+- **Purpose**: Checks whether a variable's value is **`null`**.
+- **Returns**: `true` if the variable's value is `null`, otherwise `false`.
+
+Example:
+
+```php
+$var1 = null;
+$var2 = '';
+
+echo is_null($var1); // Output: true (value is null)
+echo is_null($var2); // Output: false (value is an empty string)
+```
+
+> **Key Note**: Unlike `isset()`, `is_null()` will throw a warning if the variable is undefined.
+
+---
+
+### **Summary of Differences**
+
+| **Function** | **Checks for**                                 | **Returns true when...**                                           |
+|--------------|------------------------------------------------|--------------------------------------------------------------------|
+| `isset()`    | Variable is set and not null                   | Variable exists and is not null.                                  |
+| `empty()`    | Variable is empty or doesn't exist             | Variable is not set, or its value is `""`, `0`, `false`, or `null`.|
+| `is_null()`  | Variable's value is explicitly `null`          | Variable's value is null. Throws a warning if the variable isn't set. |
+
+---
+
+### **Practical Use Cases**
+
+1. **`isset()`**:
+   - Check if a form field is submitted:
+  
+     ```php
+     if (isset($_POST['username'])) {
+         echo "Username submitted.";
+     }
+     ```
+
+2. **`empty()`**:
+
+   - Check if a required form field is empty:
+  
+     ```php
+     if (empty($_POST['username'])) {
+         echo "Please fill out the username field.";
+     }
+     ```
+
+3. **`is_null()`**:
+   - Specifically check for `null` values in an API response or database result:
+
+     ```php
+     if (is_null($data['email'])) {
+         echo "Email is missing.";
+     }
+     ```
+
+**17. What is the difference between `public`, `protected`, and `private` access modifiers in PHP? Can you explain with examples?**
+
+---
+
+### **Access Modifiers in PHP**
+
+#### **1. `public`**
+
+- **Visibility**: `public` properties and methods can be accessed **from anywhere**:
+  - Within the class itself.
+  - From subclasses.
+  - From instances of the class.
+  
+Example:
+
+```php
+class ClassName {
+    public $pubProp = 'I am public!';
+
+    public function pubMethod() {
+        return "I am a public method!";
+    }
+}
+
+// Access from an instance
+$instance = new ClassName();
+echo $instance->pubProp; // Output: I am public!
+echo $instance->pubMethod(); // Output: I am a public method!
+
+// Access from a subclass
+class SubClass extends ClassName {
+    public function showProp() {
+        return $this->pubProp; // Access allowed
+    }
+}
+$subInstance = new SubClass();
+echo $subInstance->showProp(); // Output: I am public!
+```
+
+---
+
+#### **2. `protected`**
+
+- **Visibility**: `protected` properties and methods can only be accessed:
+  - Within the class itself.
+  - From subclasses (child classes).
+  - **Cannot** be accessed from outside the class (e.g., via an instance).
+
+Example:
+
+```php
+class ClassName {
+    protected $protProp = 'I am protected!';
+
+    protected function protMethod() {
+        return "I am a protected method!";
+    }
+}
+
+// Access from a subclass
+class SubClass extends ClassName {
+    public function showProtected() {
+        return $this->protProp; // Access allowed
+    }
+}
+
+$instance = new SubClass();
+echo $instance->showProtected(); // Output: I am protected!
+
+// Outside access will fail
+echo $instance->protProp; // Fatal error: Cannot access protected property
+```
+
+---
+
+#### **3. `private`**
+
+- **Visibility**: `private` properties and methods can only be accessed:
+  - Within the class itself.
+  - **Cannot** be accessed from subclasses or outside the class.
+
+Example:
+
+```php
+class ClassName {
+    private $privProp = 'I am private!';
+
+    private function privMethod() {
+        return "I am a private method!";
+    }
+
+    public function showPrivate() {
+        return $this->privMethod(); // Allowed within the same class
+    }
+}
+
+// Access within the class
+$instance = new ClassName();
+echo $instance->showPrivate(); // Output: I am a private method!
+
+// Access outside the class will fail
+echo $instance->privProp; // Fatal error: Cannot access private property
+```
+
+---
+
+### **Summary Table**
+
+| Modifier   | Accessible from the class itself | Accessible from a subclass | Accessible from an instance |
+|------------|-----------------------------------|-----------------------------|-----------------------------|
+| `public`   | ✅                                | ✅                          | ✅                          |
+| `protected`| ✅                                | ✅                          | ❌                          |
+| `private`  | ✅                                | ❌                          | ❌                          |
+
+---
+
+### **Key Differences**
+
+1. **`protected` vs. `private`**:
+   - `protected` allows access in subclasses, but `private` restricts it to the defining class only.
+
+2. **`public` vs. others**:
+   - `public` is completely open, while `protected` and `private` are used for encapsulation and restricting access.
+
+---
+
+**18. How does the `static` keyword work in PHP? What is the difference between a `static` property/method and a regular property/method? Can you provide examples?**
+
+Static properties and methods are indeed tied to the **class itself**, not individual instances.
+
+---
+
+### **What is the `static` Keyword?**
+
+- **Definition**: The `static` keyword is used to define properties or methods that belong to the **class itself**, rather than to any specific instance of the class.
+- **Key Characteristics**:
+  1. Static members are shared across all instances of the class.
+  2. You can access static properties or methods without creating an instance of the class.
+  3. Static properties retain their value across method calls and instances.
+
+---
+
+### **Syntax**
+
+```php
+class ClassName {
+    public static $staticProp = 'I am static!';
+
+    public static function staticMethod() {
+        return "I am a static method!";
+    }
+}
+
+// Accessing static members
+echo ClassName::$staticProp; // Output: I am static!
+echo ClassName::staticMethod(); // Output: I am a static method!
+```
+
+---
+
+### **Static vs Regular Properties/Methods**
+
+| Feature                | **Static**                                 | **Regular (Instance)**                                  |
+|------------------------|--------------------------------------------|---------------------------------------------|
+| **Binding**            | Tied to the **class** itself.              | Tied to a **specific instance** of the class. |
+| **Access**             | Accessed via `ClassName::` syntax.         | Accessed via an object instance (`$object->`). |
+| **State Persistence**  | Shared across all instances.               | Each instance has its own copy.             |
+
+---
+
+### **Example: Static Property**
+
+```php
+class Counter {
+    public static $count = 0;
+
+    public function increment() {
+        self::$count++;
+    }
+
+    public static function getCount() {
+        return self::$count;
+    }
+}
+
+$counter1 = new Counter();
+$counter1->increment();
+
+$counter2 = new Counter();
+$counter2->increment();
+
+echo Counter::$count; // Output: 2 (shared static property)
+echo Counter::getCount(); // Output: 2
+```
+
+---
+
+### **Static Methods**
+
+Static methods cannot use `$this` because they are not tied to an object instance. They can only operate on static properties or accept external arguments.
+
+Example:
+
+```php
+class Math {
+    public static function square($number) {
+        return $number * $number;
+    }
+}
+
+// Access without instantiation
+echo Math::square(5); // Output: 25
+```
+
+---
+
+### **Late Static Binding**
+
+In PHP, the `static` keyword supports **late static binding**, which means the method call is resolved to the class where the method is **invoked**, not where it is **defined**.
+
+Example:
+
+```php
+class ParentClass {
+    public static function whoAmI() {
+        return static::class; // Refers to the class that invoked the method
+    }
+}
+
+class ChildClass extends ParentClass {}
+
+echo ChildClass::whoAmI(); // Output: ChildClass
+```
+
+---
+
+### **Use Cases of `static`**
+
+1. **Counters or Shared State**: Like the example of a `Counter` class.
+2. **Utility Methods**: Methods like `Math::square()` for reusable, stateless logic.
+3. **Constants in OOP**: Often used alongside constants for shared data across instances.
+4. **Singleton Pattern**: Ensuring only one instance of a class.
+
+---
+
+**19. What is the difference between `self`, `parent`, and `static` in PHP? Can you explain with examples?**
+
+### **Corrected and Enhanced Code with Explanations**
+
+---
+
+#### **`self`**
+
+- **Definition**: Refers to the class in which it is **used** (where the method or property is declared). It does not consider inheritance or overriding in child classes.
+- **Use Case**: Useful when you want to reference the current class's own constants, methods, or properties.
+
+```php
+class ClassName {
+    public static function getClassName() {
+        return self::class; // Refers to this class
+    }
+}
+
+class SubClass extends ClassName {
+    public function printMethodClassName() {
+        return ClassName::getClassName(); // Always returns 'ClassName'
+    }
+}
+
+$subInstance = new SubClass();
+echo $subInstance->printMethodClassName(); // Output: ClassName
+```
+
+---
+
+#### **`parent`**
+
+- **Definition**: Refers to the **parent class** of the current class. It is primarily used in a subclass to call a method or access a property that exists in the parent class.
+- **Use Case**: Commonly used when overriding a method in a subclass but still needing to call the parent class's version of the method.
+
+```php
+class ParentClass {
+    public function greet() {
+        return "Hello from ParentClass!";
+    }
+}
+
+class SubClass extends ParentClass {
+    public function greet() {
+        return parent::greet() . " And hello from SubClass!"; // Calls the parent method
+    }
+}
+
+$subInstance = new SubClass();
+echo $subInstance->greet(); 
+// Output: Hello from ParentClass! And hello from SubClass!
+```
+
+---
+
+#### **`static`**
+
+- **Definition**: Refers to the class that **calls** the method or accesses the property. It respects late static binding, meaning it resolves to the class where the call was made, not where the method was declared.
+- **Use Case**: Used in scenarios involving inheritance and dynamic class references.
+
+```php
+class ClassName {
+    public static function getClassName() {
+        return static::class; // Refers to the class that called this method
+    }
+}
+
+class SubClass extends ClassName {
+}
+
+$subInstance = new SubClass();
+echo $subInstance->getClassName(); // Output: SubClass (because of late static binding)
+```
+
+---
+
+### **Key Differences Between `self`, `parent`, and `static`**
+
+| Keyword  | Refers To                              | Inheritance Considered? | Use Case                                                   |
+|----------|----------------------------------------|--------------------------|-----------------------------------------------------------|
+| `self`   | The class where it is declared         | No                       | Accessing methods, properties, or constants in the same class. |
+| `parent` | The parent class of the current class  | Yes                      | Accessing overridden methods or properties in a subclass. |
+| `static` | The class that called the method       | Yes (late static binding)| Dynamic class references and inheritance scenarios.       |
+
+---
+
+**20. What is the purpose of the `final` keyword in PHP, and how does it affect classes and methods? Can you provide examples?**
+
+In PHP, the `final` keyword is used to indicate that a class or method cannot be extended or overridden, respectively.
+
+Here’s how it works:
+
+1. **Final Class**: When a class is declared as `final`, it cannot be extended by any other class.
+
+   ```php
+   final class MyClass {
+       // Class code
+   }
+   
+   // The following will produce an error:
+   // class AnotherClass extends MyClass {}
+   ```
+
+2. **Final Method**: When a method is declared as `final` in a class, it cannot be overridden by subclasses.
+
+   ```php
+   class MyClass {
+       final public function myMethod() {
+           // Method code
+       }
+   }
+
+   class AnotherClass extends MyClass {
+       // This will produce an error:
+       // public function myMethod() {}
+   }
+   ```
+
+The `final` keyword helps to enforce specific behavior and prevent unintended changes in subclasses, which can be useful for maintaining the integrity of a class's design and ensuring certain methods or classes are not modified.
